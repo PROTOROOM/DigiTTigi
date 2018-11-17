@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266mDNS.h>
+#include <Ticker.h>
 #include "epd.h"  // e-Paper driver
 #include "assets.h"
 
@@ -15,47 +16,17 @@ const char* host = "metakits.cc";
 // online:1 , offline:0
 byte mode = 0;
 
+Ticker tick;
+int imageIndex = 1;
+boolean runTick = false;
 
-void setup(void) {
-  Serial.begin(115200);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting to ");Serial.println(ssid);  
 
-  // SPI initialization
-  pinMode(CS_PIN  , OUTPUT);
-  pinMode(RST_PIN , OUTPUT);
-  pinMode(DC_PIN  , OUTPUT);
-  pinMode(BUSY_PIN,  INPUT);
-  SPI.begin();
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  
-  // start mDNS responder
-  if (MDNS.begin("digittigi")) {
-    Serial.println("mDNS responder started");
-  }
 
-  showTitle();
-  delay(5000);
-  loadImage();
-  delay(5000);
-  showTitle();
-  delay(5000);
-  loadImage();
-
-}
-
-void loop(void) {
-
-}
 
 void showTitle(void) {
   Serial.println("Showing title");
-  EPD_dispIndex = 11;
+  EPD_dispIndex = 0;
   EPD_dispInit();
   delay(100);
   Serial.println("load");
@@ -114,7 +85,7 @@ int loadImage(void) {
   }
 
   Serial.println("Showing new image");
-  EPD_dispIndex = 11;
+  EPD_dispIndex = 0;
   EPD_dispInit();
   int dataCount = 0;
   while (client.available()) {
@@ -131,4 +102,55 @@ int loadImage(void) {
   Serial.println();
   Serial.println("closing connection");
   return 0;              
+}
+
+
+void updateImage(void) {
+  if (!runTick) runTick = true;
+}
+
+void setup(void) {
+  Serial.begin(115200);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to ");Serial.println(ssid);  
+
+  // SPI initialization
+  pinMode(CS_PIN  , OUTPUT);
+  pinMode(RST_PIN , OUTPUT);
+  pinMode(DC_PIN  , OUTPUT);
+  pinMode(BUSY_PIN,  INPUT);
+  SPI.begin();
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  
+  // start mDNS responder
+  if (MDNS.begin("digittigi")) {
+    Serial.println("mDNS responder started");
+  }
+
+//  showTitle();
+//  delay(5000);
+//  loadImage();
+//  delay(5000);
+  showTitle(); imageIndex = 2;
+  tick.attach(120, updateImage);
+  
+}
+
+
+void loop(void) {
+  if (runTick) {
+    if (imageIndex == 1) {
+      showTitle();
+      imageIndex = 2;
+    } else if (imageIndex == 2) {
+      loadImage();
+      imageIndex = 1;
+    }
+    runTick = false;
+  }
 }
