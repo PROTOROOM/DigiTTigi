@@ -180,14 +180,14 @@ void EPD_Reset()
   delay(200);
 }
 
-/* e-Paper initialization functions ------------------------------------------*/
-#include "epd1in54.h"
-#include "epd2in13.h"
+///* e-Paper initialization functions ------------------------------------------*/
+//#include "epd1in54.h"
+//#include "epd2in13.h"
 #include "epd2in9.h"
-#include "epd2in7.h"
-#include "epd4in2.h"
-#include "epd5in83.h"
-#include "epd7in5.h"
+//#include "epd2in7.h"
+//#include "epd4in2.h"
+//#include "epd5in83.h"
+//#include "epd7in5.h"
 
 
 int  EPD_dispIndex;        // The index of the e-Paper's type
@@ -237,169 +237,7 @@ void EPD_loadA()
 //  }
 }
 
-/* Image data loading function for b-type e-Paper ----------------------------*/
-void EPD_loadB()
-{
-//  int index = 0;
-//  String p = server.arg(0);
-//
-//  // Get the length of the image data begin
-//  int DataLength = p.length() - 8;
-//
-//  // Enumerate all of image data bytes
-//  while (index < DataLength)
-//  {
-//    // Get current byte from obtained image data
-//    int valueA = ((int)p[index] - 'a') + (((int)p[index + 1] - 'a') << 4);
-//    int valueB = 0;
-//
-//    // Enumerate next 8 pixels
-//    for (int i = 0; i < 4; i++)
-//    {
-//      // Current obtained pixel data
-//      int temp = valueA & 0x03;
-//
-//      // Remove the obtained pixel data from 'valueA' word
-//      valueA = valueA >> 2;
-//
-//      // Processing of 8 2-bit pixels to 8 2-bit pixels:
-//      // black(value 0) to bits 00, white(value 1) to bits 11, gray(otherwise) to bits 10
-//      valueB = (valueB << 2);
-//      valueB += (temp == 1 ? 3 : (temp == 0 ? 0 : 2));
-//    }
-//
-//    // Write the word into e-Paper's memory
-//    EPD_SendData((byte)valueB);
-//
-//    // Increment the current byte index on 2 characters
-//    index += 2;
-//  }
-}
 
-/* Image data loading function for 2.13 e-Paper ------------------------------*/
-void EPD_loadC()
-{
-//      int index = 0;
-//      String p = server.arg(0);
-//    
-//      // Get the length of the image data begin
-//      int DataLength = p.length() - 8;
-//  
-//      EPD_Send_2(0x44, 0, 15);        //SET_RAM_X_ADDRESS_START_END_POSITION LO(x >> 3), LO((w - 1) >> 3)
-//      EPD_Send_4(0x45, 0, 0, 249, 0); //SET_RAM_Y_ADDRESS_START_END_POSITION LO(y), HI(y), LO(h - 1), HI(h - 1)
-//  
-//      // Enumerate all of image data bytes
-//      while (index < DataLength)
-//      {
-//          // Before write a line of image data
-//          // 2.13 e-Paper requires to set the address counter
-//          // Every line has 15*8-6 pixels + 6 empty bits, totally 15*8 bits
-//          if (EPD_dispX == 0)
-//          {
-//              EPD_Send_1(0x4E, 0           );//SET_RAM_X_ADDRESS_COUNTER: LO(x >> 3)
-//              EPD_Send_2(0x4F, EPD_dispY, 0);//SET_RAM_Y_ADDRESS_COUNTER: LO(y), HI(y)
-//              EPD_SendCommand(0x24);//WRITE_RAM
-//          }
-//          int value = ((int)p[index] - 'a') + (((int)p[index + 1] - 'a') << 4);
-//          // Write the byte into e-Paper's memory
-//          EPD_SendData((byte)value);
-//  
-//          // Increment the current byte index on 2 characters
-//          index += 2;
-//  
-//          // EPD_dispX and EPD_dispY increments
-//          if (++EPD_dispX > 15)
-//          {
-//              EPD_dispX = 0;
-//  
-//              // If the client's browser sends more bits, than it needs, then exit the function
-//              if (++EPD_dispY > 250) return;
-//          }
-//      }
-}
-
-/* Image data loading function for 7.5 e-Paper -------------------------------*/
-void EPD_loadD()
-{
-//  int index = 0;
-//  String p = server.arg(0);
-//
-//  // Get the length of the image data begin
-//  int DataLength = p.length() - 8;
-//
-//  // Enumerate all of image data bytes
-//  while (index < DataLength)
-//  {
-//    // Get current byte from obtained image data
-//    int value = ((int)p[index] - 'a') + (((int)p[index + 1] - 'a') << 4);;
-//
-//    // Processing of 4 1-bit pixels to 4 4-bit pixels:
-//    // black(value 0) to bits 0000, white(value 1) to bits 0011
-//    for (int i = 0; i < 4; i++) {
-//      int temp = 0;
-//      if (value & 0x80){
-//        temp =  0x30;
-//      }
-//      value = value << 1;
-//      if (value & 0x80){
-//        temp |=  0x03;
-//      }
-//      value = value << 1;
-//      EPD_SendData((byte)temp);
-//    }
-//    // Increment the current byte index on 2 characters
-//    index += 2;
-//  }
-}
-
-/* Image data loading function for 7.5b e-Paper ------------------------------*/
-void EPD_loadE()
-{
-//  int index = 0;
-//  String p = server.arg(0);
-//
-//  // Get the length of the image data begin
-//  int DataLength = p.length() - 8;
-//
-//  // Enumerate all of image data bytes
-//  while (index < DataLength)
-//  {
-//    // Get current byte from obtained image data
-//    int value = ((int)p[index] - 'a') + (((int)p[index + 1] - 'a') << 4);;
-//    for (int i = 0; i < 2; i++) {
-//      int temp = 0;
-//      if ((value & 0x03) == 0x03){
-//        temp =  0x40;
-//      }else if((value & 0x03) == 0x01){
-//        temp =  0x30;
-//      }
-//      value = value >> 2;
-//      if ((value & 0x03) == 0x03){
-//        temp |=  0x04;
-//      }else if((value & 0x03) == 0x01){
-//        temp |=  0x03;
-//      }
-//      value = value >> 2;
-//      EPD_SendData((byte)temp);
-//    }
-//    // Increment the current byte index on 2 characters
-//    index += 2;
-//  }
-}
-
-/* Show image and turn to deep sleep mode (a-type, 4.2 and 2.7 e-Paper) ------*/
-void EPD_showA()
-{
-  // Refresh
-  EPD_Send_1(0x22, 0xC4);//DISPLAY_UPDATE_CONTROL_2
-  EPD_SendCommand(0x20);//MASTER_ACTIVATION
-  EPD_SendCommand(0xFF);//TERMINATE_FRAME_READ_WRITE
-  EPD_WaitUntilIdle();
-
-  // Sleep
-  EPD_SendCommand(0x10);//DEEP_SLEEP_MODE
-  EPD_WaitUntilIdle();
-}
 
 /* Show image and turn to deep sleep mode (b-type, e-Paper) ------------------*/
 void EPD_showB()
@@ -417,52 +255,8 @@ void EPD_showB()
   EPD_SendCommand(0x02);//POWER_OFF
 }
 
-/* Show image and turn to deep sleep mode (7.5 and 7.5b e-Paper) -------------*/
-void EPD_showC()
-{
-  // Refresh
-  EPD_SendCommand(0x12);//DISPLAY_REFRESH
-  delay(100);
-  EPD_WaitUntilIdle();
 
-  // Sleep
-  EPD_SendCommand(0x02);// POWER_OFF
-  EPD_WaitUntilIdle();
-  EPD_Send_1(0x07, 0xA5);// DEEP_SLEEP
-}
 
-void EPD_showD()
-{
-    // VCOM AND DATA INTERVAL SETTING
-    // WBmode:VBDF 17, D7 VBDW 97, VBDB 57
-    // WBRmode:VBDF F7, VBDW 77, VBDB 37, VBDR B7
-    EPD_Send_1(0x50, 0x97);
-
-    EPD_SendCommand(0x20);
-    for(int count=0; count<44; count++) EPD_SendData(lut_vcomDC_2in13d[count]);
-    
-    EPD_SendCommand(0x21);
-    for(int count=0; count<42; count++) EPD_SendData(lut_ww_2in13d[count]);
-
-    EPD_SendCommand(0x22);
-    for(int count=0; count<42; count++) EPD_SendData(lut_bw_2in13d[count]);
-    
-    EPD_SendCommand(0x23);
-    for(int count=0; count<42; count++) EPD_SendData(lut_wb_2in13d[count]);
-    
-    EPD_SendCommand(0x24);
-    for(int count=0; count<42; count++) EPD_SendData(lut_bb_2in13d[count]);
-
-  
-    delay(10);
-    EPD_SendCommand(0x12);//DISPLAY REFRESH
-    delay(100);     //!!!The delay here is necessary, 200uS at least!!!
-    EPD_WaitUntilIdle(); 
-
-    EPD_Send_1(0x50, 0xf7);
-    EPD_SendCommand( 0x02);//POWER_OFF
-    EPD_Send_1(0x07, 0xA5);//DEEP_SLEEP
-}
 
 
 /* The set of pointers on 'init', 'load' and 'show' functions, title and code */
@@ -479,27 +273,7 @@ struct EPD_dispInfo
 /* Array of sets describing the usage of e-Papers ----------------------------*/
 EPD_dispInfo EPD_dispMass[] =
 {
-    { EPD_Init_1in54 , EPD_loadA, -1  , 0,         EPD_showA, "1.54 inch"   },// a 0
-    { EPD_Init_1in54b, EPD_loadB, 0x13, EPD_loadA, EPD_showB, "1.54 inch b" },// b 1
-    { EPD_Init_1in54c, EPD_loadA, 0x13, EPD_loadA, EPD_showB, "1.54 inch c" },// c 2
-    { EPD_Init_2in13 , EPD_loadC, -1  , 0,         EPD_showA, "2.13 inch"   },// d 3
-    { EPD_Init_2in13b, EPD_loadA, 0x13, EPD_loadA, EPD_showB, "2.13 inch b" },// e 4
-    { EPD_Init_2in13b, EPD_loadA, 0x13, EPD_loadA, EPD_showB, "2.13 inch c" },// f 5
-    { EPD_Init_2in13d, EPD_loadA, -1  , 0,         EPD_showD, "2.13 inch d" },// g 6
-    { EPD_Init_2in7  , EPD_loadA, -1  , 0,         EPD_showB, "2.7 inch"    },// h 7
-    { EPD_Init_2in7b , EPD_loadA, 0x13, EPD_loadA, EPD_showB, "2.7 inch b"  },// i 8
-    { EPD_Init_2in9  , EPD_loadA, -1  , 0,         EPD_showA, "2.9 inch"    },// j 9
-    { EPD_Init_2in9b , EPD_loadA, 0x13, EPD_loadA, EPD_showB, "2.9 inch b"  },// k 10
-    { EPD_Init_2in9b , EPD_loadA, 0x13, EPD_loadA, EPD_showB, "2.9 inch c"  },// l 11
-    { EPD_Init_4in2  , EPD_loadA, -1  , 0,         EPD_showB, "4.2 inch"    },// m 12
-    { EPD_Init_4in2b , EPD_loadA, 0x13, EPD_loadA, EPD_showB, "4.2 inch b"  },// n 13
-    { EPD_Init_4in2b , EPD_loadA, 0x13, EPD_loadA, EPD_showB, "4.2 inch c"  },// o 14
-    { EPD_5in83__init, EPD_loadD, -1  , 0,         EPD_showC, "5.83 inch"   },// p 15
-    { EPD_5in83b__init,EPD_loadE, -1  , 0,         EPD_showC, "5.83 inch b" },// q 16
-    { EPD_5in83b__init,EPD_loadE, -1  , 0,         EPD_showC, "5.83 inch c" },// r 17
-    { EPD_7in5__init , EPD_loadD, -1  , 0,         EPD_showC, "7.5 inch"    },// s 18
-    { EPD_7in5__init , EPD_loadE, -1  , 0,         EPD_showC, "7.5 inch b"  },// t 19
-    { EPD_7in5__init , EPD_loadE, -1  , 0,         EPD_showC, "7.5 inch c"  } // u 20
+    { EPD_Init_2in9b , EPD_loadA, 0x13, EPD_loadA, EPD_showB, "2.9 inch c"  },// l 0
 };
 
 /* Initialization of an e-Paper ----------------------------------------------*/
