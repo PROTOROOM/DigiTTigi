@@ -19,13 +19,13 @@ void setup(void) {
   delay(1000);
   Serial.println("load");
   for (int i=0; i<7; i++) {
-    EPD_load(test1[i]);
+    EPD_load(title[0][i]);
     delay(10);
   }
   EPD_SendCommand(0x13);
   delay(2);
   for (int i=0; i<7; i++) {
-    EPD_load(test2[i]);
+    EPD_load(title[1][i]);
     delay(10);
   }
   Serial.println("done");
