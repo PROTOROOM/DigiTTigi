@@ -1,4 +1,5 @@
 const fs = require('fs');
+const process = require('process');
 const { createCanvas, loadImage } = require('canvas');
 // var w = 296;
 // var h = 128;
@@ -6,41 +7,69 @@ var sw = 296;
 var sh = 128;
 var w = 128;
 var h = 296;
-const source = createCanvas(w, h);
-const canvas = createCanvas(w, h);
 var curPal = [[0,0,0],[255,255,255],[220,180,0]];
+var total_pages = 0;
 
 
-var image_name = 'test2';
-var file = image_name + '.png';
+// var image_name = 'test2';
+// var file = image_name + '.png';
+
+var book_path = process.argv[2];
+if (!book_path) {
+  console.log("need book path");
+  return;
+}
+
+var book_src = book_path + 'src/';
+var book_data = book_path + 'data/';
+console.log(book_src);
+
+fs.readdir(book_src, (err, files) => {
+    if (err) throw err;
+    console.log(files);
+    // for (var i=0; i<files.length; i++) {
+    total_pages = files.length;
+
+    files.forEach(function(file) {
+      var file_path = book_src + file;
+      var image_name = file.split('.')[0];
+
+      console.log('dd ' + file_path);
+
+      loadImage(file_path).then((image) => {
+        console.log(file_path);
+        var source = createCanvas(w, h);
+        var canvas = createCanvas(w, h);
+        var ctx=source.getContext('2d');
+        ctx.translate(image.height/2, image.width/2);
+        ctx.rotate(270*Math.PI/180);
+        ctx.drawImage(image, -image.width/2, -image.height/2);
+        // source.getContext('2d').drawImage(image, 0, 0, w, h);
+
+        var pSrc = ctx.getImageData(0, 0, w, h);
+        var pDst = processImage(pSrc);
+        canvas.getContext('2d').putImageData(pDst, 0, 0);
+
+        var out = fs.createWriteStream(book_data + image_name + '_r.png');
+        var stream = canvas.createPNGStream();
+        stream.pipe(out);
+
+        var p = pDst;
+        var a = new Array(w*h);
+        var i = 0;
+        for(var y=0;y<h;y++)for(var x=0;x<w;x++,i++)a[i]=getVal(p,i<<2);
+        var html = "TOTAL"+total_pages+'\n'+makeRawData(a);
+        fs.writeFile(book_data + image_name + '.html', html, 'utf8', (err) => {
+            if (err) throw err;
+            console.log('raw data saved: ' + image_name);
+        });
+
+      });
 
 
-loadImage(file).then((image) => {
-  var ctx=source.getContext('2d');
-  ctx.translate(image.height/2, image.width/2);
-  ctx.rotate(270*Math.PI/180);
-  ctx.drawImage(image, -image.width/2, -image.height/2);
-  // source.getContext('2d').drawImage(image, 0, 0, w, h);
-
-  var pSrc = ctx.getImageData(0, 0, w, h);
-  var pDst = processImage(pSrc);
-  canvas.getContext('2d').putImageData(pDst, 0, 0);
-
-  var out = fs.createWriteStream(image_name + '_r.png');
-  var stream = canvas.createPNGStream();
-  stream.pipe(out);
-
-  var p = pDst;
-  var a = new Array(w*h);
-  var i = 0;
-  for(var y=0;y<h;y++)for(var x=0;x<w;x++,i++)a[i]=getVal(p,i<<2);
-  var html = makeRawData(a);
-  fs.writeFile(image_name + '.html', html, 'utf8', (err) => {
-      if (err) throw err;
-      console.log('raw data saved');
-  });
-
+    });
 });
+
 
 
 function getVal(p, i){
@@ -85,6 +114,7 @@ function getNear(r,g,b){
 
 
 function processImage(pSrc) {
+  var canvas = createCanvas(w, h);
   var pDst = canvas.getContext('2d').getImageData(0, 0, w, h);
   var dX = 0;
   var dY = 0;
