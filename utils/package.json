@@ -1,0 +1,11 @@
+{
+  "name": "DigiTTigi utils",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "PROTOROOM",
+  "homepage": "https://github.com/PROTOROOM/DigiTTigi",
+  "dependencies": {
+    "canvas": "^2.1.0"
+  }
+}
