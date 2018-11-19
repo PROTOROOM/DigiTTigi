@@ -2,27 +2,42 @@
 #include <WiFiClient.h>
 #include <ESP8266mDNS.h>
 #include <Ticker.h>
+#include <EEPROM.h>
 #include "epd.h"  // e-Paper driver
 #include "assets.h"
 
-// ================================= 
+// =================================
 // Please setup for your WiFi AP
 const char* ssid = "olleh_WiFi_E707";
 const char* password = "0000007706";
-// ================================= 
+//const char* ssid = "workspace";
+//const char* password = "work7531";
+// =================================
 
 
-const char* host = "metakits.cc";
-// online:1 , offline:0
-byte mode = 0;
+// book for digittigi
+// book0 : for testing
+// alice : Alice's Adventures in Wonderland
+String bookName = "book0";
+
+
+const char* host = "ttigi.protoroom.kr";
+//const char* host = "protoroom.github.io";
+
+
+byte pageMode = 0; // title:0, loadImage:1
+byte tPage = 1; // EEPROM address 0
+byte cPage = 0;
+byte pageCount = 0;
+byte pagePerChapter = 1; // show title after showing 3 pages
+
 
 Ticker tick;
-int imageIndex = 1;
+int tickTime = 60;
 boolean runTick = false;
 
 
-
-
+// =================================
 
 void showTitle(void) {
   Serial.println("Showing title");
@@ -30,18 +45,18 @@ void showTitle(void) {
   EPD_dispInit();
   delay(100);
   Serial.println("load");
-  for (int i=0; i<7; i++) {
+  for (int i = 0; i < 7; i++) {
     EPD_load(title[0][i]);
     delay(2);
   }
   EPD_SendCommand(0x13);
   delay(2);
-  for (int i=0; i<7; i++) {
+  for (int i = 0; i < 7; i++) {
     EPD_load(title[1][i]);
     delay(2);
   }
   Serial.println("done");
-  EPD_showB();  
+  EPD_showB();
 }
 
 
@@ -54,33 +69,32 @@ void loadData(int i, String data) {
   delay(2);
 }
 
-int loadImage(void) {
+void loadImage(int pageNumber) {
   Serial.println("loading image ");
 
   WiFiClient client;
   const int httpPort = 80;
-    
+
   if (!client.connect(host, httpPort)) {
     Serial.println("connection failed");
-    return -1;
+    return;
   }
 
-  int key = 1; // XXX
-  String url = "/load.html";
-//  url += key;
+  String page = String(pageNumber) + ".html";
+  String url = "/books/"+ bookName + "/data/" + page;
 
   String req = String("GET ") + url + " HTTP/1.1\r\n" +
-    "Host: " + host + "\r\n" +
-    "Connection: close\r\n\r\n";
+               "Host: " + host + "\r\n" +
+               "Connection: close\r\n\r\n";
   Serial.println(req);
-  client.print(req);  
-    
+  client.print(req);
+
   unsigned long timeout = millis();
   while (client.available() == 0) {
     if (millis() - timeout > 5000) {
       Serial.println(">>> Client Timeout !");
       client.stop();
-      return -2;
+      return;
     }
   }
 
@@ -90,18 +104,26 @@ int loadImage(void) {
   int dataCount = 0;
   while (client.available()) {
     String line = client.readStringUntil('\n');
+    if (line.startsWith("TOTAL")) {
+      line.trim();
+      tPage = line.substring(5).toInt();
+      EEPROM.write(0, tPage);
+      EEPROM.commit();
+      Serial.println("Update Total Page Number");
+    }
     if (line.startsWith("LOAD")) {
       line.trim();
       loadData(dataCount, line.substring(4));
       dataCount++;
-      Serial.println(line.substring(4));
-    }   
+      Serial.print("loading page from : ");Serial.print(host);Serial.println(url);
+//      Serial.println(line.substring(4));
+    }
   }
-  EPD_showB();  
-
-  Serial.println();
-  Serial.println("closing connection");
-  return 0;              
+  Serial.print("Total Page: ");Serial.println(tPage);
+  Serial.print("Current Page: ");Serial.println(cPage);
+  Serial.println("Loading Page Done");
+  EPD_showB();
+  return;
 }
 
 
@@ -109,11 +131,14 @@ void updateImage(void) {
   if (!runTick) runTick = true;
 }
 
+
 void setup(void) {
   Serial.begin(115200);
+  EEPROM.begin(512);
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  Serial.print("Connecting to ");Serial.println(ssid);  
+  Serial.print("Connecting to "); Serial.println(ssid);
 
   // SPI initialization
   pinMode(CS_PIN  , OUTPUT);
@@ -126,31 +151,38 @@ void setup(void) {
     delay(500);
     Serial.print(".");
   }
-  
+
   // start mDNS responder
   if (MDNS.begin("digittigi")) {
     Serial.println("mDNS responder started");
   }
 
-//  showTitle();
-//  delay(5000);
-//  loadImage();
-//  delay(5000);
-  showTitle(); imageIndex = 2;
-  tick.attach(120, updateImage);
-  
+  tPage = EEPROM.read(0);
+  Serial.print("Total Pages: "); Serial.println(tPage);
+
+  showTitle(); pageMode = 1;
+  tick.attach(tickTime, updateImage);
+
 }
 
 
 void loop(void) {
   if (runTick) {
-    if (imageIndex == 1) {
+    if (pageMode == 0) {
       showTitle();
-      imageIndex = 2;
-    } else if (imageIndex == 2) {
-      loadImage();
-      imageIndex = 1;
+      pageMode = 1;
+    } else if (pageMode == 1) {
+      cPage++;
+      if (cPage > tPage) cPage = 1;
+      loadImage(cPage);
+      pageCount++;
+
+      if (pageCount >= pagePerChapter) {
+        pageCount = 0;
+        pageMode = 0;
+      }
     }
+    
     runTick = false;
   }
 }
