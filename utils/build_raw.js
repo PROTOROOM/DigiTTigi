@@ -11,7 +11,7 @@ const canvas = createCanvas(w, h);
 var curPal = [[0,0,0],[255,255,255],[220,180,0]];
 
 
-var image_name = 'test';
+var image_name = 'test2';
 var file = image_name + '.png';
 
 
@@ -35,7 +35,7 @@ loadImage(file).then((image) => {
   var i = 0;
   for(var y=0;y<h;y++)for(var x=0;x<w;x++,i++)a[i]=getVal(p,i<<2);
   var html = makeRawData(a);
-  fs.writeFile('test.html', html, 'utf8', (err) => {
+  fs.writeFile(image_name + '.html', html, 'utf8', (err) => {
       if (err) throw err;
       console.log('raw data saved');
   });
