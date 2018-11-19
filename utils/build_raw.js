@@ -2,6 +2,8 @@ const fs = require('fs');
 const { createCanvas, loadImage } = require('canvas');
 // var w = 296;
 // var h = 128;
+var sw = 296;
+var sh = 128;
 var w = 128;
 var h = 296;
 const source = createCanvas(w, h);
@@ -9,14 +11,18 @@ const canvas = createCanvas(w, h);
 var curPal = [[0,0,0],[255,255,255],[220,180,0]];
 
 
-var image_name = 'test2';
+var image_name = 'test';
 var file = image_name + '.png';
 
 
 loadImage(file).then((image) => {
-  source.getContext('2d').drawImage(image, 0, 0, w, h);
+  var ctx=source.getContext('2d');
+  ctx.translate(image.height/2, image.width/2);
+  ctx.rotate(270*Math.PI/180);
+  ctx.drawImage(image, -image.width/2, -image.height/2);
+  // source.getContext('2d').drawImage(image, 0, 0, w, h);
 
-  var pSrc = source.getContext('2d').getImageData(0, 0, w, h);
+  var pSrc = ctx.getImageData(0, 0, w, h);
   var pDst = processImage(pSrc);
   canvas.getContext('2d').putImageData(pDst, 0, 0);
 
