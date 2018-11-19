@@ -29,6 +29,17 @@ loadImage(file).then((image) => {
   var out = fs.createWriteStream(image_name + '_r.png');
   var stream = canvas.createPNGStream();
   stream.pipe(out);
+
+  var p = pDst;
+  var a = new Array(w*h);
+  var i = 0;
+  for(var y=0;y<h;y++)for(var x=0;x<w;x++,i++)a[i]=getVal(p,i<<2);
+  var html = makeRawData(a);
+  fs.writeFile('test.html', html, 'utf8', (err) => {
+      if (err) throw err;
+      console.log('raw data saved');
+  });
+
 });
 
 
@@ -59,6 +70,7 @@ function getErr(r,g,b,stdCol){
   b-=stdCol[2];
   return r*r + g*g + b*b;
 }
+
 
 function getNear(r,g,b){
   var ind=0;
@@ -137,4 +149,53 @@ function processImage(pSrc) {
   }
   }
   return pDst;
+}
+
+
+function byteToStr(v){return String.fromCharCode((v & 0xF) + 97, ((v >> 4) & 0xF) + 97);}
+
+
+function makeRawData(a) {
+  var html = '<pre>\n'
+
+  // while((pxInd<a.length)&&(rqMsg.length<1500)) {
+  c = 0;
+  var rqMsg = '';
+  var pxInd = 0;
+  while(pxInd < a.length) {
+    var v=0;
+    for (var i=0;i<8;i++) {
+      if((pxInd<a.length)&&(a[pxInd]!=c))v|=(128>>i);
+      pxInd++;
+    }
+    rqMsg += byteToStr(v);
+
+    if (rqMsg.length >= 1500) {
+      html += 'LOAD' + rqMsg + '\n';
+      rqMsg = '';
+    }
+  }
+  html += 'LOAD' + rqMsg + '\n';
+  console.log(rqMsg);
+
+  c = 3;
+  var rqMsg = '';
+  var pxInd = 0;
+  while(pxInd < a.length) {
+    var v=0;
+    for (var i=0;i<8;i++) {
+      if((pxInd<a.length)&&(a[pxInd]!=c))v|=(128>>i);
+      pxInd++;
+    }
+    rqMsg += byteToStr(v);
+
+    if (rqMsg.length >= 1500) {
+      html += 'LOAD' + rqMsg + '\n';
+      rqMsg = '';
+    }
+  }
+  html += 'LOAD' + rqMsg + '\n';
+
+  return html+'</pre>';
+
 }
