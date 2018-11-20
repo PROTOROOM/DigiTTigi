@@ -18,7 +18,7 @@ const char* password = "0000007706";
 // book for digittigi
 // book0 : for testing
 // alice : Alice's Adventures in Wonderland
-String bookName = "book0";
+String bookName = "alice";
 
 
 const char* host = "ttigi.protoroom.kr";
