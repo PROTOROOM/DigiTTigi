@@ -8,10 +8,15 @@
 
 // =================================
 // Please setup for your WiFi AP
-const char* ssid = "olleh_WiFi_E707";
-const char* password = "0000007706";
-//const char* ssid = "workspace";
-//const char* password = "work7531";
+//const char* ssid = "YOUR WIFI AP NAME";
+//const char* password = "PASSWORD";
+
+const char* ssid = "501HWa-22BE5E";
+const char* password = "5059680a";
+
+// setup tick time
+// default : 360 (60 * 6min)
+int tickTime = 50;
 // =================================
 
 
@@ -29,11 +34,10 @@ byte pageMode = 0; // title:0, loadImage:1
 byte tPage = 1; // EEPROM address 0
 byte cPage = 0;
 byte pageCount = 0;
-byte pagePerChapter = 1; // show title after showing 3 pages
+byte pagePerChapter = 4; // show title after showing 3 pages
 
 
 Ticker tick;
-int tickTime = 60;
 boolean runTick = false;
 
 
