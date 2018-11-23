@@ -5,5 +5,12 @@
 DigiTTigi is a digitalized book band that raises the idea of Meta-book.
 띠지(TTigi) is a Korean word for "Book band, Belly band or Obi".
 
+
+# How to setup WiFi
+ * setup Arduino for ESP8266 : https://www.waveshare.com/wiki/E-Paper_ESP8266_Driver_Board
+ * download DigiTTigi source code
+ * change WiFi information and upload firmware
+
+ 
 # credits
  - PROTOROOM (http://protoroom.kr)
